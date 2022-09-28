@@ -1,7 +1,8 @@
 package de.fr3qu3ncy.easyconfig.serializers;
 
-import de.fr3qu3ncy.easyconfig.ConfigLocation;
 import de.fr3qu3ncy.easyconfig.SerializationInfo;
+import de.fr3qu3ncy.easyconfig.data.DataSource;
+import de.fr3qu3ncy.easyconfig.data.DataWriter;
 import de.fr3qu3ncy.easyconfig.serialization.ConfigSerializer;
 
 import javax.annotation.Nonnull;
@@ -11,13 +12,13 @@ import java.util.regex.Pattern;
 public class StringSerializer implements ConfigSerializer<String> {
 
     @Override
-    public void serialize(@Nonnull SerializationInfo<?> info, @Nonnull ConfigLocation location, @Nonnull String value) {
-        location.setSingle(value);
+    public void serialize(@Nonnull SerializationInfo<?> info, DataWriter writer, @Nonnull String value) {
+        writer.writeData(value);
     }
 
     @Override
-    public String deserialize(@Nonnull SerializationInfo<?> info, @Nonnull ConfigLocation location) {
-        return formatColors(location.getSingle());
+    public String deserialize(@Nonnull SerializationInfo<?> info, DataSource source) {
+        return formatColors(source.getData());
     }
 
     private static String formatColors(String message) {

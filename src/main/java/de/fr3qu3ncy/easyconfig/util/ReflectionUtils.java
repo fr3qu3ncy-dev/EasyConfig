@@ -1,5 +1,6 @@
 package de.fr3qu3ncy.easyconfig.util;
 
+import de.fr3qu3ncy.easyconfig.annotation.CollectionKey;
 import de.fr3qu3ncy.easyconfig.annotation.ConfigIgnore;
 import de.fr3qu3ncy.easyconfig.annotation.ConfigurableField;
 import lombok.SneakyThrows;
@@ -94,5 +95,30 @@ public class ReflectionUtils {
         Constructor<?> constructor = clazz.getDeclaredConstructor();
         constructor.setAccessible(true);
         return constructor.newInstance();
+    }
+
+    public static String getCollectionKeyField(Field field) {
+        if (field != null && field.isAnnotationPresent(CollectionKey.class)) {
+            return field.getAnnotation(CollectionKey.class).value();
+        }
+        return null;
+    }
+
+    @SneakyThrows
+    public static String getCollectionKey(String keyFieldName, Object obj) {
+        String key = null;
+        //Use custom key if available
+        if (keyFieldName != null) {
+            Field field = ReflectionUtils.findField(keyFieldName, obj.getClass());
+            field.setAccessible(true);
+
+            Object keyObject = field.get(obj);
+            if (keyObject instanceof String) {
+                key = (String) keyObject;
+            } else if (keyObject instanceof Enum<?>) {
+                key = ((Enum<?>) keyObject).name();
+            }
+        }
+        return key;
     }
 }

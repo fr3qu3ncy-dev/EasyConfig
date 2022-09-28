@@ -1,7 +1,8 @@
 package de.fr3qu3ncy.easyconfig.serialization;
 
-import de.fr3qu3ncy.easyconfig.ConfigLocation;
 import de.fr3qu3ncy.easyconfig.SerializationInfo;
+import de.fr3qu3ncy.easyconfig.data.DataSource;
+import de.fr3qu3ncy.easyconfig.data.DataWriter;
 import de.fr3qu3ncy.easyconfig.register.ConfigRegistry;
 import de.fr3qu3ncy.easyconfig.util.ReflectionUtils;
 import lombok.SneakyThrows;
@@ -14,7 +15,7 @@ public interface Configurable<T> extends ConfigSerializer<T> {
 
     @SneakyThrows
     @Override
-    default void serialize(@Nonnull SerializationInfo<?> info, @Nonnull ConfigLocation location, @Nonnull T instance) {
+    default void serialize(@Nonnull SerializationInfo<?> info, DataWriter writer, @Nonnull T instance) {
         for (Field field : ReflectionUtils.getConfigurableFields(getClass()).keySet()) {
 
             field.setAccessible(true);
@@ -27,16 +28,16 @@ public interface Configurable<T> extends ConfigSerializer<T> {
             //Check serializer
             if (serializer != null) {
                 serializer.serialize(new SerializationInfo<>(field.getGenericType(), null, field),
-                    location.getChild(fieldName), value);
+                    writer.getChildWriter(fieldName), value);
             } else {
-                location.setInSection(fieldName, value);
+                writer.writeData(fieldName, value);
             }
         }
     }
 
     @SneakyThrows
     @Override
-    default T deserialize(@Nonnull SerializationInfo<?> info, @Nonnull ConfigLocation location) {
+    default T deserialize(@Nonnull SerializationInfo<?> info, DataSource source) {
         //Instantiate class from no args constructor
         Object instance;
         if (info.getType() instanceof Class<?>) {
@@ -54,9 +55,9 @@ public interface Configurable<T> extends ConfigSerializer<T> {
             ConfigSerializer<?> serializer = ConfigRegistry.getSerializer(fieldType);
             if (serializer != null) {
                 deserializedObject = serializer.deserialize(new SerializationInfo<>(fieldType, null, blankField),
-                    location.getChild(fieldName));
+                    source.getChildSource(fieldName));
             } else {
-                deserializedObject = location.getChild(fieldName).getSingle();
+                deserializedObject = source.getData(fieldName);
             }
 
             try {

@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class EasyConfig {
+public final class EasyConfig {
 
     @Setter
     private static boolean debug = false;

@@ -1,7 +1,6 @@
 package de.fr3qu3ncy.easyconfig.register;
 
-import com.mojang.datafixers.types.Func;
-import de.fr3qu3ncy.easyconfig.ConfigLocation;
+import de.fr3qu3ncy.easyconfig.data.config.ConfigDataSource;
 import de.fr3qu3ncy.easyconfig.serialization.ConfigSerializer;
 import de.fr3qu3ncy.easyconfig.serialization.Configurable;
 import de.fr3qu3ncy.easyconfig.serializers.CollectionSerializer;
@@ -22,7 +21,7 @@ public class ConfigRegistry {
 
     private static final Map<Class<?>, ConfigSerializer<?>> serializers = new HashMap<>();
     private static final List<Class<? extends ConfigSerializer<?>>> abstractConfigParsers = new ArrayList<>();
-    private static final Map<Type, Function<ConfigLocation, Class<?>>> variableTypes = new HashMap<>();
+    private static final Map<Type, Function<ConfigDataSource, Class<?>>> variableTypes = new HashMap<>();
 
     static {
         register(String.class, new StringSerializer());
@@ -44,15 +43,15 @@ public class ConfigRegistry {
         abstractConfigParsers.add(clazz);
     }
 
-    public static void registerVariableType(Type type, Function<ConfigLocation, Class<?>> func) {
+    public static void registerVariableType(Type type, Function<ConfigDataSource, Class<?>> func) {
         variableTypes.put(type, func);
     }
 
-    public static Class<?> getVariableType(Type type, ConfigLocation location) {
+    public static Class<?> getVariableType(Type type, ConfigDataSource source) {
         if (!variableTypes.containsKey(type)) return null;
 
-        Function<ConfigLocation, Class<?>> func = variableTypes.get(type);
-        return func.apply(location);
+        Function<ConfigDataSource, Class<?>> func = variableTypes.get(type);
+        return func.apply(source);
     }
 
     public static <T extends Type, P extends ConfigSerializer<?>> P getSerializer(T type) {

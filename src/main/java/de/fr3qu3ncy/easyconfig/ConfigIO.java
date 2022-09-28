@@ -1,5 +1,9 @@
 package de.fr3qu3ncy.easyconfig;
 
+import de.fr3qu3ncy.easyconfig.data.DataSource;
+import de.fr3qu3ncy.easyconfig.data.DataWriter;
+import de.fr3qu3ncy.easyconfig.data.config.ConfigDataSource;
+import de.fr3qu3ncy.easyconfig.data.config.ConfigDataWriter;
 import de.fr3qu3ncy.easyconfig.register.ConfigRegistry;
 import de.fr3qu3ncy.easyconfig.serialization.ConfigSerializer;
 import de.fr3qu3ncy.easyconfig.util.ConfigUtils;
@@ -16,14 +20,15 @@ public class ConfigIO {
 
     private ConfigIO() {}
 
-    private static <T> void serialize(@Nonnull ConfigLocation location, @Nonnull ConfigSerializer<T> serializer,
-                                      T value, @Nonnull SerializationInfo<?> info) {
-        serializer.serialize(info, location, value);
+    private static <T> void serialize(@Nonnull ConfigSerializer<T> serializer, @Nonnull SerializationInfo<?> info,
+                                      @Nonnull DataWriter writer,
+                                      T value) {
+        serializer.serialize(info, writer, value);
     }
 
-    private static <T> T deserialize(@Nonnull ConfigLocation location, @Nonnull ConfigSerializer<T> serializer,
-                                     @Nonnull SerializationInfo<?> info) {
-        return serializer.deserialize(info, location);
+    private static <T> T deserialize(@Nonnull ConfigSerializer<T> serializer, @Nonnull SerializationInfo<?> info,
+                                     @Nonnull DataSource source) {
+        return serializer.deserialize(info, source);
     }
 
     /**
@@ -57,12 +62,14 @@ public class ConfigIO {
 
         if (serializer != null) {
             //Class has serializer
-            serialize(location, serializer, value,
+            serialize(serializer,
                 new SerializationInfo<>(
                     type,
                     value,
                     originalField
-                ));
+                ),
+                new ConfigDataWriter(location.getName(), location.getSection()),
+                value);
         } else {
             //Class doesn't have serializer
             location.setSingle(value);
@@ -81,11 +88,12 @@ public class ConfigIO {
 
         if (serializer != null) {
             //Class has serializer
-            return deserialize(location, serializer,
+            return deserialize(serializer,
                 new SerializationInfo<>(
                     holderField.getFieldType(),
                     holderField.getDefaultValue(),
-                    holderField.getField()));
+                    holderField.getField()),
+                new ConfigDataSource(location.getName(), location.getSection()));
         } else {
             //Class doesn't have serializer
             return holderField.getConfig().getBukkitConfig().get(holderField.getPath(), holderField.getDefaultValue());
@@ -101,11 +109,12 @@ public class ConfigIO {
 
         if (serializer != null) {
             //Class has serializer
-            return (T) deserialize(location, serializer,
+            return (T) deserialize(serializer,
                 new SerializationInfo<>(
                     genericType,
                     defaultValue,
-                    null));
+                    null),
+                new ConfigDataSource(location.getName(), location.getSection()));
         } else {
             //Class doesn't have serializer
             return (T) config.getBukkitConfig().get(path, defaultValue);
