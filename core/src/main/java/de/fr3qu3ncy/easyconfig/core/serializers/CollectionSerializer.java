@@ -76,7 +76,6 @@ public class CollectionSerializer implements ConfigSerializer<Collection<?>> {
         //Check (existing) serializer
         ConfigSerializer<Object> serializer = ConfigRegistry.getSerializer(collectionType);
         if (serializer != null) {
-            System.out.println("Deserializing key " + source.getKey());
             List<LinkedHashMap<Object, Object>> list = source.getData();
             for (LinkedHashMap<Object, Object> element : list) {
                 collection.add(serializer.deserialize(info, new MapDataSource(null, element)));

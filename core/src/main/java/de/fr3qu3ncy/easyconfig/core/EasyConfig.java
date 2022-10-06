@@ -44,7 +44,7 @@ public abstract class EasyConfig {
     private File configFile;
 
     @Getter
-    private final FileConfig fileConfig;
+    private FileConfig fileConfig;
 
     @Nonnull
     private final ConfigWriter writer;
@@ -94,12 +94,17 @@ public abstract class EasyConfig {
     }
 
     private void loadHolderField(HolderField holderField) {
+        logInfo("Path: " + holderField.getPath() +
+            " | Contained in file? " + fileConfig.contains(holderField.getPath()) +
+            " | Default value: " + holderField.getDefaultValue());
         //Check if field has default that is not already saved to the config
         if (holderField.getDefaultValue() != null && !fileConfig.contains(holderField.getPath())) {
+            logInfo("Writing default of " + holderField.getPath() + " to config...");
             ConfigIO.saveInConfig(this, holderField);
             ConfigIO.writeToField(holderField);
         } else if (fileConfig.contains(holderField.getPath())) {
             //Path already has a value in config, now write it to the field
+            logInfo("Reading value of " + holderField.getPath() + " from config...");
             ConfigIO.writeToField(holderField);
         }
     }
@@ -160,8 +165,10 @@ public abstract class EasyConfig {
         fileConfig.save(configFile);
     }
 
-    public void reloadConfig() {
-        configFile = null;
+    public abstract void reload();
+
+    protected void reloadInternal(FileConfig newFileConfig) {
+        this.fileConfig = newFileConfig;
         load();
     }
 }

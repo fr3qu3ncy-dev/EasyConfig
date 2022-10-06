@@ -27,6 +27,16 @@ public class BungeeConfig extends EasyConfig {
 
     @SneakyThrows
     private static Configuration loadConfig(String filePath, String fileName) {
-        return ConfigurationProvider.getProvider(YamlConfiguration.class).load(new File(filePath, fileName));
+        return loadConfig(new File(filePath, fileName));
+    }
+
+    @SneakyThrows
+    private static Configuration loadConfig(File file) {
+        return ConfigurationProvider.getProvider(YamlConfiguration.class).load(file);
+    }
+
+    @Override
+    public void reload() {
+        reloadInternal(new BungeeFileConfig(loadConfig(getConfigFile()), "", ""));
     }
 }

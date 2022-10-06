@@ -48,6 +48,7 @@ public class ConfigIO {
     public static void writeToField(@Nonnull HolderField holderField) {
         Object deserializedObject = get(holderField);
 
+        holderField.getConfig().logInfo("Deserialized " + deserializedObject + " from " + holderField.getPath());
         holderField.getField().set(null, deserializedObject);
     }
 

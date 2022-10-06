@@ -16,13 +16,21 @@ public class SpigotConfig extends EasyConfig {
             absolutePath, holder, filePath, fileName);
     }
 
-    public SpigotConfig(@Nonnull String absolutePath,
-                           @Nullable Class<?> holder, @Nonnull String fileName) {
+    public SpigotConfig(@Nonnull String absolutePath, @Nullable Class<?> holder, @Nonnull String fileName) {
         super(new SpigotFileConfig(loadConfig(absolutePath, fileName)), new Preferences(new SpigotStringFormatter()),
             absolutePath, holder, fileName);
     }
 
     private static YamlConfiguration loadConfig(String filePath, String fileName) {
-        return YamlConfiguration.loadConfiguration(new File(filePath, fileName));
+        return loadConfig(new File(filePath, fileName + ".yml"));
+    }
+
+    private static YamlConfiguration loadConfig(File file) {
+        return YamlConfiguration.loadConfiguration(file);
+    }
+
+    @Override
+    public void reload() {
+        reloadInternal(new SpigotFileConfig(loadConfig(getConfigFile())));
     }
 }

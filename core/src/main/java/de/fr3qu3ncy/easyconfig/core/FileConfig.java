@@ -6,8 +6,6 @@ public interface FileConfig extends FileConfigSection {
 
     <T> T get(String path, T defaultValue);
 
-    boolean contains(String path);
-
     void setMaxWidth(int width);
 
     void setCopyDefaults(boolean value);
