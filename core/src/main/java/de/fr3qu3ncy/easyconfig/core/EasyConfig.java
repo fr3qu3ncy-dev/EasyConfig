@@ -14,11 +14,14 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.logging.Logger;
 
 public abstract class EasyConfig {
 
     @Setter
     private static boolean debug = false;
+
+    private final Logger logger = Logger.getLogger("EasyConfig");
 
     @Getter
     private final Preferences preferences;
@@ -66,11 +69,11 @@ public abstract class EasyConfig {
     void logInfo(String message) {
         if (!debug) return;
 
-        System.out.println("[EasyConfig] " + message);
+        logger.info(message);
     }
 
     void logError(String message) {
-        System.out.println("[EasyConfig ERROR] " + message);
+        logger.severe(message);
     }
 
     public void load() {
@@ -87,7 +90,7 @@ public abstract class EasyConfig {
             logInfo("Loading field " + field.getName() + " in holder class " + holder.getName() + ".");
             loadHolderField(new HolderField(this, field));
         }
-        writer.replaceComments();
+        writer.replaceCommentsAndGroups();
     }
 
     private void loadHolderField(HolderField holderField) {
@@ -139,7 +142,7 @@ public abstract class EasyConfig {
         if (field == null) {
             throw new IllegalArgumentException("Cannot create new path with set()!");
         }
-        ConfigIO.set(this, path, field.getFieldType(), object, field.getField(), field.getComment());
+        ConfigIO.set(this, path, object, field);
     }
 
     @Nullable
@@ -161,19 +164,4 @@ public abstract class EasyConfig {
         configFile = null;
         load();
     }
-
-/*    public static List<EasyConfig> loadInDirectory(String absolutePath, String path, Configuration configuration) {
-        File directory = new File(absolutePath, path);
-        if (!directory.isDirectory()) return new ArrayList<>();
-
-        List<EasyConfig> list = new ArrayList<>();
-
-        for (File file : directory.listFiles()) {
-            String fileName = file.getName().substring(0, file.getName().lastIndexOf("."));
-            EasyConfig config = new EasyConfig(absolutePath, null, path, fileName);
-            config.load(configuration);
-            list.add(config);
-        }
-        return list;
-    }*/
 }

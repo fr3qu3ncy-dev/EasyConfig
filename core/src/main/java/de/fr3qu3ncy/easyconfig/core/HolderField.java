@@ -1,6 +1,7 @@
 package de.fr3qu3ncy.easyconfig.core;
 
 import de.fr3qu3ncy.easyconfig.core.annotation.Comment;
+import de.fr3qu3ncy.easyconfig.core.annotation.ConfigGroup;
 import de.fr3qu3ncy.easyconfig.core.annotation.ConfigPath;
 import de.fr3qu3ncy.easyconfig.core.register.ConfigRegistry;
 import de.fr3qu3ncy.easyconfig.core.serialization.ConfigSerializer;
@@ -22,6 +23,8 @@ public class HolderField {
     private final Object defaultValue;
     private final ConfigSerializer<Object> parser;
     private String comment;
+    private String group;
+    private boolean writeGroupHeader;
 
     @SneakyThrows
     public HolderField(EasyConfig config, Field field) {
@@ -48,6 +51,11 @@ public class HolderField {
 
         if (field.isAnnotationPresent(Comment.class)) {
             this.comment = field.getAnnotation(Comment.class).value();
+        }
+        if (field.isAnnotationPresent(ConfigGroup.class)) {
+            ConfigGroup configGroup = field.getAnnotation(ConfigGroup.class);
+            this.group = configGroup.value();
+            this.writeGroupHeader = configGroup.writeHeader();
         }
     }
 

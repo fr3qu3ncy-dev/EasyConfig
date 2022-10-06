@@ -7,16 +7,19 @@ import de.fr3qu3ncy.easyconfig.core.data.config.ConfigDataWriter;
 import de.fr3qu3ncy.easyconfig.core.register.ConfigRegistry;
 import de.fr3qu3ncy.easyconfig.core.serialization.ConfigSerializer;
 import de.fr3qu3ncy.easyconfig.core.util.ConfigUtils;
+import de.fr3qu3ncy.easyconfig.core.util.GroupUtils;
 import lombok.SneakyThrows;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 
 public class ConfigIO {
 
+    public static final String COMMENT_START_IDENTIFIER = "_COMMENT_START_";
     public static final String COMMENT_IDENTIFIER = "_COMMENT_";
+    public static final String GROUP_IDENTIFIER = "_GROUP_";
+    public static final String GROUP_HEADER_IDENTIFIER = "_GROUP_HEADER_";
 
     private ConfigIO() {}
 
@@ -36,10 +39,9 @@ public class ConfigIO {
      */
     public static void saveInConfig(@Nonnull EasyConfig config, @Nonnull HolderField holderField) {
         String path = holderField.getPath();
-        String comment = holderField.getComment();
         @Nonnull Object defaultValue = holderField.getDefaultValue();
 
-        set(config, path, holderField.getFieldType(), defaultValue, holderField.getField(), comment);
+        set(config, path, defaultValue, holderField);
     }
 
     @SneakyThrows
@@ -49,25 +51,31 @@ public class ConfigIO {
         holderField.getField().set(null, deserializedObject);
     }
 
-    public static void set(@Nonnull EasyConfig config, @Nonnull String path, @Nonnull Type type,
-                           @Nonnull Object value, @Nullable Field originalField, @Nullable String comment) {
+    public static void set(@Nonnull EasyConfig config, @Nonnull String path, @Nonnull Object value,
+                           @Nonnull HolderField holderField) {
         //Check if value class has serializer
-        ConfigSerializer<Object> serializer = ConfigRegistry.getSerializer(type);
+        ConfigSerializer<Object> serializer = ConfigRegistry.getSerializer(holderField.getFieldType());
 
         //Create ConfigLocation
         ConfigLocation location = ConfigUtils.createLocation(config, path);
 
+        //Save group
+        saveGroup(location, holderField.getGroup());
+
+        //Save group header
+        saveGroupHeader(location, holderField.getGroup(), holderField.isWriteGroupHeader());
+
         //Save comment
-        saveComment(location, comment);
+        saveComment(location, holderField.getComment());
 
         if (serializer != null) {
             //Class has serializer
             serialize(serializer,
                 new SerializationInfo<>(
                     config,
-                    type,
+                    holderField.getFieldType(),
                     value,
-                    originalField
+                    holderField.getField()
                 ),
                 new ConfigDataWriter(location.getName(), location.getSection()),
                 value);
@@ -112,11 +120,7 @@ public class ConfigIO {
         if (serializer != null) {
             //Class has serializer
             return (T) deserialize(serializer,
-                new SerializationInfo<>(
-                    config,
-                    genericType,
-                    defaultValue,
-                    null),
+                new SerializationInfo<>(config, genericType, defaultValue, null),
                 new ConfigDataSource(location.getName(), location.getSection()));
         } else {
             //Class doesn't have serializer
@@ -126,7 +130,36 @@ public class ConfigIO {
 
     private static void saveComment(@Nonnull ConfigLocation location, @Nullable String comment) {
         if (comment != null) {
-            location.setSingle(location.getName() + COMMENT_IDENTIFIER, comment);
+            handleMultiLineComment(location, comment);
+        }
+    }
+
+    private static void saveGroup(@Nonnull ConfigLocation location, @Nullable String group) {
+        if (group != null) {
+            location.setSingle(location.getName() + GROUP_IDENTIFIER, group);
+        }
+    }
+
+    private static void saveGroupHeader(@Nonnull ConfigLocation location, @Nullable String header, boolean write) {
+        if (header != null && write) {
+            handleMultiLineHeader(location, header);
+        }
+    }
+
+    private static void handleMultiLineComment(ConfigLocation location, String comment) {
+        int i = 0;
+        for (String line : comment.split("\n")) {
+            location.setSingle(location.getName() + "_" + i + "_" +
+                (i == 0 ? COMMENT_START_IDENTIFIER : COMMENT_IDENTIFIER), line);
+            i++;
+        }
+    }
+
+    private static void handleMultiLineHeader(ConfigLocation location, String header) {
+        int i = 0;
+        for (String line : GroupUtils.createHeader(header.split("\n"))) {
+            location.setSingle(location.getName() + "_" + i + "_" + GROUP_HEADER_IDENTIFIER, line);
+            i++;
         }
     }
 }
