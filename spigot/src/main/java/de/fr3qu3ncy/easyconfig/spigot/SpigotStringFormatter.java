@@ -1,6 +1,6 @@
 package de.fr3qu3ncy.easyconfig.spigot;
 
-import de.fr3qu3ncy.easyconfig.core.preferences.StringFormatter;
+import de.fr3qu3ncy.easyconfignew.core.configuration.StringFormatter;
 import net.md_5.bungee.api.ChatColor;
 
 public class SpigotStringFormatter implements StringFormatter {

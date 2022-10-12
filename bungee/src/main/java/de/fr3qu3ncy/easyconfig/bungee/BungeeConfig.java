@@ -1,42 +1,27 @@
 package de.fr3qu3ncy.easyconfig.bungee;
 
-import de.fr3qu3ncy.easyconfig.core.EasyConfig;
-import de.fr3qu3ncy.easyconfig.core.preferences.Preferences;
+import de.fr3qu3ncy.easyconfignew.core.EasyConfig;
+import de.fr3qu3ncy.easyconfignew.core.configuration.StringFormatter;
 import lombok.SneakyThrows;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.File;
 
 public class BungeeConfig extends EasyConfig {
 
-    public BungeeConfig(@Nonnull String absolutePath, @Nullable Class<?> holder,
-                           @Nonnull String filePath, @Nonnull String fileName) {
-        super(new BungeeFileConfig(loadConfig(filePath, fileName), "", ""), new Preferences(new BungeeStringFormatter()),
-            absolutePath, holder, filePath, fileName);
-    }
-
-    public BungeeConfig(@Nonnull String absolutePath, @Nullable Class<?> holder,
-                           @Nonnull String fileName) {
-        super(new BungeeFileConfig(loadConfig(absolutePath, fileName), "", ""), new Preferences(new BungeeStringFormatter()),
-            absolutePath, holder, fileName);
+    public BungeeConfig(File configDirectory, String fileName, Class<?> holdingClass) {
+        super(new BungeeFileConfig(loadConfig(configDirectory, fileName)), configDirectory, holdingClass, fileName);
     }
 
     @SneakyThrows
-    private static Configuration loadConfig(String filePath, String fileName) {
-        return loadConfig(new File(filePath, fileName));
-    }
-
-    @SneakyThrows
-    private static Configuration loadConfig(File file) {
-        return ConfigurationProvider.getProvider(YamlConfiguration.class).load(file);
+    private static Configuration loadConfig(File configDirectory, String fileName) {
+        return ConfigurationProvider.getProvider(YamlConfiguration.class).load(new File(configDirectory, fileName + ".yml"));
     }
 
     @Override
-    public void reload() {
-        reloadInternal(new BungeeFileConfig(loadConfig(getConfigFile()), "", ""));
+    public StringFormatter getStringFormatter() {
+        return new BungeeStringFormatter();
     }
 }

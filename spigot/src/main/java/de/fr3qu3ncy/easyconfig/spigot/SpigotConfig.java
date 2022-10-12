@@ -1,36 +1,21 @@
 package de.fr3qu3ncy.easyconfig.spigot;
 
-import de.fr3qu3ncy.easyconfig.core.EasyConfig;
-import de.fr3qu3ncy.easyconfig.core.preferences.Preferences;
+import de.fr3qu3ncy.easyconfignew.core.EasyConfig;
+import de.fr3qu3ncy.easyconfignew.core.configuration.StringFormatter;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.File;
 
 public class SpigotConfig extends EasyConfig {
 
-    public SpigotConfig(@Nonnull String absolutePath,
-                           @Nullable Class<?> holder, @Nonnull String filePath, @Nonnull String fileName) {
-        super(new SpigotFileConfig(loadConfig(filePath, fileName)), new Preferences(new SpigotStringFormatter()),
-            absolutePath, holder, filePath, fileName);
-    }
-
-    public SpigotConfig(@Nonnull String absolutePath, @Nullable Class<?> holder, @Nonnull String fileName) {
-        super(new SpigotFileConfig(loadConfig(absolutePath, fileName)), new Preferences(new SpigotStringFormatter()),
-            absolutePath, holder, fileName);
-    }
-
-    private static YamlConfiguration loadConfig(String filePath, String fileName) {
-        return loadConfig(new File(filePath, fileName + ".yml"));
-    }
-
-    private static YamlConfiguration loadConfig(File file) {
-        return YamlConfiguration.loadConfiguration(file);
+    public SpigotConfig(File configDirectory, String fileName, Class<?> holdingClass) {
+        super(new SpigotFileConfig(
+            YamlConfiguration.loadConfiguration(new File(configDirectory, fileName + ".yml"))),
+            configDirectory, holdingClass, fileName);
     }
 
     @Override
-    public void reload() {
-        reloadInternal(new SpigotFileConfig(loadConfig(getConfigFile())));
+    public StringFormatter getStringFormatter() {
+        return new SpigotStringFormatter();
     }
 }
