@@ -12,6 +12,7 @@
         <module>spigot</module>
         <module>bungee</module>
         <module>core</module>
+        <module>velocity</module>
     </modules>
 
     <properties>
@@ -23,7 +24,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>RELEASE</version>
+            <version>1.18.24</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>

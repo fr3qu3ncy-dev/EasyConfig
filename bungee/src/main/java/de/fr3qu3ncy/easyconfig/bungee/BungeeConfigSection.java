@@ -1,6 +1,6 @@
 package de.fr3qu3ncy.easyconfig.bungee;
 
-import de.fr3qu3ncy.easyconfignew.core.configuration.FileConfiguration;
+import de.fr3qu3ncy.easyconfig.core.configuration.FileConfiguration;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import net.md_5.bungee.config.Configuration;

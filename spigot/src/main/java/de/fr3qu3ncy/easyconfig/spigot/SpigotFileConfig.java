@@ -1,6 +1,6 @@
 package de.fr3qu3ncy.easyconfig.spigot;
 
-import de.fr3qu3ncy.easyconfignew.core.configuration.FileConfiguration;
+import de.fr3qu3ncy.easyconfig.core.configuration.FileConfiguration;
 import lombok.SneakyThrows;
 import org.bukkit.configuration.file.YamlConfiguration;
 
